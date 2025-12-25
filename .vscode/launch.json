@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Android: Run App",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "Android: Run App",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Android: Build & Install",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "Android: Install Debug",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        }
+    ],
+    // Note: VS Code doesn't have native Kotlin/Android debugging support.
+    // For full debugging with breakpoints, use Android Studio.
+    // Here we use tasks to build and run the app, and logcat for debugging.
+    // To view logs: Run task "Android: View Logcat" or use: adb logcat
+}
