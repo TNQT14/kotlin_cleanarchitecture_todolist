@@ -22,7 +22,14 @@ fun TodoListScreen(viewModel :TodoViewModel){
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {Text("Todolist")}
+                title = {
+                    Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text("Todo list")
+                }
+                }
             )
         },
         floatingActionButton = {

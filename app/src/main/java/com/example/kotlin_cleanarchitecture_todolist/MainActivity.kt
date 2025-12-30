@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Tạo ViewModel và hiển thị màn hình TodoListScreen
                     val viewModel: TodoViewModel = viewModel()
                     TodoListScreen(viewModel = viewModel)
                 }
