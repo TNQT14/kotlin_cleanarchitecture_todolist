@@ -16,6 +16,12 @@ import com.example.kotlin_cleanarchitecture_todolist.ui.theme.Kotlin_cleanarchit
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val database = AppModule.provideDatabase(this)
+        val todoDao = AppModule.provideTodoDao(database)
+        val repository = AppModule.provideRepository(todoDao)
+        val getAllTodoUseCase = AppModule.providerGetAllTodoUseCase(repository)
+        val insertTodoUsecase = AppModule.provideInsertTodoUsecase(repository)
+
         enableEdgeToEdge()
         setContent {
             Kotlin_cleanarchitecture_todolistTheme {
@@ -23,7 +29,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: TodoViewModel = viewModel()
+                    val viewModel: TodoViewModel = viewModel(
+                        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                                @Suppress("UNCHECKED_CAST")
+                                return TodoViewModel(
+                                    getAllTodoUseCase,
+                                    insertTodoUsecase
+                                ) as T
+                            }
+                        }
+                    )
                     TodoListScreen(viewModel = viewModel)
                 }
             }

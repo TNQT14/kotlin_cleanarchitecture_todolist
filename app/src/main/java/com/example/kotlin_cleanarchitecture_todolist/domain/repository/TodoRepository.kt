@@ -1,4 +1,5 @@
 package com.example.kotlin_cleanarchitecture_todolist.domain.repository
+import com.example.kotlin_cleanarchitecture_todolist.data.local.TodoEntity
 import com.example.kotlin_cleanarchitecture_todolist.domain.model.Todo
 import kotlinx.coroutines.flow.Flow
 interface TodoRepository {
