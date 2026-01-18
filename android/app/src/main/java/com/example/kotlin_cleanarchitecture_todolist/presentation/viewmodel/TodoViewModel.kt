@@ -34,19 +34,34 @@ class TodoViewModel(
     private val _sortType = MutableStateFlow(SortType.DATE_NEWEST)
     val sortType: StateFlow<SortType> = _sortType.asStateFlow()
     
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    
     val todos: StateFlow<List<Todo>> = combine(
         allTodos,
         _filterType,
+        _searchQuery,
         _sortType
-    ) { todos, filter, sort ->
+    ) { todos, filter, search, sort ->
         var result = todos
 
+        // Apply filter
         result = when (filter) {
             FilterType.ALL -> result
             FilterType.ACTIVE -> result.filter { !it.isCompleted }
             FilterType.COMPLETED -> result.filter { it.isCompleted }
         }
 
+        // Apply search
+        if (search.isNotBlank()) {
+            val query = search.lowercase().trim()
+            result = result.filter { todo ->
+                todo.title.lowercase().contains(query) ||
+                todo.description.lowercase().contains(query)
+            }
+        }
+
+        // Apply sort
         result = when (sort) {
             SortType.DATE_NEWEST -> result.sortedByDescending { it.createdAt }
             SortType.DATE_OLDEST -> result.sortedBy { it.createdAt }
@@ -104,5 +119,9 @@ class TodoViewModel(
     
     fun setSortType(sortType: SortType) {
         _sortType.value = sortType
+    }
+    
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 }

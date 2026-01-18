@@ -1,5 +1,6 @@
 package com.example.kotlin_cleanarchitecture_todolist.presentation.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,9 +26,11 @@ fun TodoListScreen(viewModel: TodoViewModel) {
     val todos by viewModel.todos.collectAsStateWithLifecycle()
     val filterType by viewModel.filterType.collectAsStateWithLifecycle()
     val sortType by viewModel.sortType.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
+    var todoDetail by remember { mutableStateOf<Todo?>(null) }
 
     Scaffold(
         topBar = {
@@ -47,6 +50,10 @@ fun TodoListScreen(viewModel: TodoViewModel) {
                             onSortSelected = { viewModel.setSortType(it) }
                         )
                     }
+                )
+                SearchBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { viewModel.setSearchQuery(it) }
                 )
                 FilterChipRow(
                     currentFilter = filterType,
@@ -99,7 +106,8 @@ fun TodoListScreen(viewModel: TodoViewModel) {
                         todo = todo,
                         onToggleComplete = { viewModel.toggleComplete(it) },
                         onEdit = { todoToEdit = it },
-                        onDelete = { todoToDelete = it }
+                        onDelete = { todoToDelete = it },
+                        onClick = { todoDetail = it }
                     )
                 }
             }
@@ -137,6 +145,16 @@ fun TodoListScreen(viewModel: TodoViewModel) {
             }
         )
     }
+
+    todoDetail?.let { todo ->
+        TodoDetailSheet(
+            todo = todo,
+            onDismiss = { todoDetail = null },
+            onEdit = { todoDetail = null; todoToEdit = it },
+            onDelete = { todoDetail = null; todoToDelete = it },
+            onToggleComplete = { viewModel.toggleComplete(it) }
+        )
+    }
 }
 
 @Composable
@@ -144,10 +162,13 @@ fun TodoItem(
     todo: Todo,
     onToggleComplete: (Todo) -> Unit,
     onEdit: (Todo) -> Unit,
-    onDelete: (Todo) -> Unit
+    onDelete: (Todo) -> Unit,
+    onClick: (Todo) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(todo) }
     ) {
         Row(
             modifier = Modifier
