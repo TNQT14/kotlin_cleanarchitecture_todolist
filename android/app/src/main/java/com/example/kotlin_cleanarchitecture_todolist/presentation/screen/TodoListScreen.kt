@@ -23,22 +23,36 @@ import com.example.kotlin_cleanarchitecture_todolist.presentation.viewmodel.Todo
 @Composable
 fun TodoListScreen(viewModel: TodoViewModel) {
     val todos by viewModel.todos.collectAsStateWithLifecycle()
+    val filterType by viewModel.filterType.collectAsStateWithLifecycle()
+    val sortType by viewModel.sortType.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Todo list")
+            Column {
+                TopAppBar(
+                    title = {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Todo list")
+                        }
+                    },
+                    actions = {
+                        SortMenu(
+                            currentSort = sortType,
+                            onSortSelected = { viewModel.setSortType(it) }
+                        )
                     }
-                }
-            )
+                )
+                FilterChipRow(
+                    currentFilter = filterType,
+                    onFilterSelected = { viewModel.setFilterType(it) }
+                )
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
