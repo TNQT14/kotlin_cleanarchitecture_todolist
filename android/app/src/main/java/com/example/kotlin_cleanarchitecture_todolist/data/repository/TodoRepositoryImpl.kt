@@ -25,10 +25,10 @@ class TodoRepositoryImpl (
     }
 
     override suspend fun updateTodo(todo: Todo) {
-        TODO("Not yet implemented")
+        return todoDao.updateTodo(TodoEntity.fromDomain(todo))
     }
 
     override suspend fun deleteTodo(todo: Todo) {
-        TODO("Not yet implemented")
+        return todoDao.deleteTodo(TodoEntity.fromDomain(todo))
     }
 }

@@ -20,7 +20,9 @@ class MainActivity : ComponentActivity() {
         val todoDao = AppModule.provideTodoDao(database)
         val repository = AppModule.provideRepository(todoDao)
         val getAllTodoUseCase = AppModule.providerGetAllTodoUseCase(repository)
-        val insertTodoUsecase = AppModule.provideInsertTodoUsecase(repository)
+        val insertTodoUseCase = AppModule.provideInsertTodoUsecase(repository)
+        val updateTodoUseCase = AppModule.provideUpdateTodoUsecase(repository)
+        val deleteTodoUseCase = AppModule.provideDeleteTodoUseCase(repository)
 
         enableEdgeToEdge()
         setContent {
@@ -35,7 +37,9 @@ class MainActivity : ComponentActivity() {
                                 @Suppress("UNCHECKED_CAST")
                                 return TodoViewModel(
                                     getAllTodoUseCase,
-                                    insertTodoUsecase
+                                    insertTodoUseCase,
+                                    updateTodoUseCase,
+                                    deleteTodoUseCase,
                                 ) as T
                             }
                         }
