@@ -7,13 +7,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.kotlin_cleanarchitecture_todolist.domain.model.Todo
+import com.example.kotlin_cleanarchitecture_todolist.presentation.utils.DateFormatter
 import com.example.kotlin_cleanarchitecture_todolist.presentation.viewmodel.TodoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,6 +24,8 @@ import com.example.kotlin_cleanarchitecture_todolist.presentation.viewmodel.Todo
 fun TodoListScreen(viewModel: TodoViewModel) {
     val todos by viewModel.todos.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
+    var todoToEdit by remember { mutableStateOf<Todo?>(null) }
+    var todoToDelete by remember { mutableStateOf<Todo?>(null) }
 
     Scaffold(
         topBar = {
@@ -43,20 +48,46 @@ fun TodoListScreen(viewModel: TodoViewModel) {
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(todos) { todo ->
-                TodoItem(
-                    todo = todo,
-                    onToggleComplete = {viewModel.toggleComplete(it)},
-                    onDelete = {
-                    viewModel.deleteTodo(todo)
-                })
+        if (todos.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Chưa có todo nào",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Nhấn nút + để thêm todo mới",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(todos) { todo ->
+                    TodoItem(
+                        todo = todo,
+                        onToggleComplete = { viewModel.toggleComplete(it) },
+                        onEdit = { todoToEdit = it },
+                        onDelete = { todoToDelete = it }
+                    )
+                }
             }
         }
     }
@@ -68,13 +99,39 @@ fun TodoListScreen(viewModel: TodoViewModel) {
                 viewModel.addTodo(title, description)
                 showAddDialog = false
             }
+        )
+    }
 
+    todoToEdit?.let { todo ->
+        EditTodoDialog(
+            todo = todo,
+            onDismiss = { todoToEdit = null },
+            onConfirm = { title, description ->
+                viewModel.editTodo(todo, title, description)
+                todoToEdit = null
+            }
+        )
+    }
+
+    todoToDelete?.let { todo ->
+        DeleteConfirmationDialog(
+            todoTitle = todo.title,
+            onDismiss = { todoToDelete = null },
+            onConfirm = {
+                viewModel.deleteTodo(todo)
+                todoToDelete = null
+            }
         )
     }
 }
 
 @Composable
-fun TodoItem(todo: Todo, onToggleComplete: (Todo) -> Unit, onDelete: (Todo) -> Unit) {
+fun TodoItem(
+    todo: Todo,
+    onToggleComplete: (Todo) -> Unit,
+    onEdit: (Todo) -> Unit,
+    onDelete: (Todo) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -101,19 +158,45 @@ fun TodoItem(todo: Todo, onToggleComplete: (Todo) -> Unit, onDelete: (Todo) -> U
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = todo.description,
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = DateFormatter.formatRelative(todo.createdAt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                IconButton(
+                    onClick = { onEdit(todo) },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                IconButton(
+                    onClick = { onDelete(todo) },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
             }
-            Button(
-                onClick = { onDelete(todo) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete"
-                )
-            }
-
         }
     }
 }

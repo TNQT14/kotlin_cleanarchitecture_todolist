@@ -38,6 +38,17 @@ class TodoViewModel(
         }
     }
 
+    fun editTodo(todo: Todo, newTitle: String, newDescription: String) {
+        if (newTitle.isBlank()) return
+        viewModelScope.launch {
+            val updatedTodo = todo.copy(
+                title = newTitle,
+                description = newDescription
+            )
+            updateTodoUseCase(updatedTodo)
+        }
+    }
+
     fun toggleComplete(todo: Todo){
         viewModelScope.launch {
             val updateTodo = todo.copy(isCompleted = !todo.isCompleted)
